@@ -1,0 +1,8 @@
+#ifndef AFFINE_INVARIANT_OBJECT_DETECTION_AFFINE_INVARIANT_OBJECT_DETECTION
+#define AFFINE_INVARIANT_OBJECT_DETECTION_AFFINE_INVARIANT_OBJECT_DETECTION
+
+#include <affine_invariant_features/affine_invariant_feature.hpp>
+
+namespace affine_invariant_object_detection {}
+
+#endif
