@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(affine_invariant_object_detection)
+project(label_detection)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -105,7 +105,7 @@ find_package(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES affine_invariant_object_detection
+#  LIBRARIES label_detection
   CATKIN_DEPENDS affine_invariant_features cv_bridge image_transport nodelet roscpp sensor_msgs
 #  DEPENDS system_lib
 )
@@ -123,28 +123,36 @@ include_directories(
   )
 
 ## Declare a C++ library
-# add_library(affine_invariant_object_detection
-#   src/${PROJECT_NAME}/affine_invariant_object_detection.cpp
+# add_library(label_detection
+#   src/${PROJECT_NAME}/label_detection.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(affine_invariant_object_detection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(label_detection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 add_executable(
-  affine_invariant_object_detection_node 
-  src/affine_invariant_object_detection_node.cpp
+  label_detection_node 
+  src/label_detection_node.cpp
+  )
+add_executable(
+  test_label_detector 
+  src/test_label_detector.cpp
   )
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(affine_invariant_object_detection_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(label_detection_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
-  affine_invariant_object_detection_node
+  label_detection_node
+  ${catkin_LIBRARIES}
+  )
+target_link_libraries(
+  test_label_detector
   ${catkin_LIBRARIES}
   )
 
@@ -163,7 +171,7 @@ target_link_libraries(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS affine_invariant_object_detection affine_invariant_object_detection_node
+# install(TARGETS label_detection label_detection_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -188,7 +196,7 @@ target_link_libraries(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_affine_invariant_object_detection.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_label_detection.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
