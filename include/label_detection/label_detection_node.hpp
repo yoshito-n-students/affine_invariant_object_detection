@@ -1,7 +1,6 @@
 #ifndef LABEL_DETECTION_LABEL_DETECTION_NODE
 #define LABEL_DETECTION_LABEL_DETECTION_NODE
 
-#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -32,8 +31,8 @@ public:
     namespace it = image_transport;
 
     // reset objects
-    publisher_.shutdown();
     subscriber_.shutdown();
+    publisher_.shutdown();
 
     // load parameters
     const std::string transport(rp::param< std::string >(rn::append(ns, "transport"), "raw"));
