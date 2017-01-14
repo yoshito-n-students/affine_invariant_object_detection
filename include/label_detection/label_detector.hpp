@@ -168,14 +168,14 @@ public:
       if (nmatched / nfeatures < match_ratio_) {
         continue;
       }
-      // project contours
-      std::vector< cv::Point2f > tmp_contour;
-      tmp_contour.insert(tmp_contour.end(), contours_[i].begin(), contours_[i].end());
-      cv::perspectiveTransform(tmp_contour, tmp_contour, transforms[i]);
+      // project contour
+      std::vector< cv::Point2f > contour;
+      contour.insert(contour.end(), contours_[i].begin(), contours_[i].end());
+      cv::perspectiveTransform(contour, contour, transforms[i].inv());
       // push to the outputs
       names.push_back(names_[i]);
       contours.resize(contours.size() + 1);
-      contours.back().insert(contours.back().end(), tmp_contour.begin(), tmp_contour.end());
+      contours.back().insert(contours.back().end(), contour.begin(), contour.end());
     }
   }
 
