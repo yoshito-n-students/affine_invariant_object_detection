@@ -128,10 +128,12 @@ public:
       }
       if (use_simple_feature) {
         feature_ = params->createFeature();
+        ROS_INFO_STREAM("Created feature algorithm based on " << params->getDefaultName());
       } else {
         feature_ = aif::AffineInvariantFeature::create(params->createFeature());
+        ROS_INFO_STREAM("Created affine invariant feature algorithm based on "
+                        << params->getDefaultName());
       }
-      ROS_INFO_STREAM("Created feature algorithm based on " << params->getDefaultName());
     }
 
     // set other parameters
@@ -140,7 +142,7 @@ public:
   }
 
   void detect(const cv::Mat &image, std::vector< std::string > &names,
-              std::vector< std::vector< cv::Point > > &contours) {
+              std::vector< std::vector< cv::Point > > &contours) const {
     namespace aif = affine_invariant_features;
 
     CV_Assert(feature_);
