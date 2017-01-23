@@ -1,6 +1,7 @@
 #ifndef LABEL_DETECTION_LABEL_DETECTOR
 #define LABEL_DETECTION_LABEL_DETECTOR
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -72,47 +73,40 @@ public:
           continue;
         }
 
-        // skip an entry not containing a target description
+        // skip an entry not containing a target description with a contour
         const cv::FileStorage file(path.string(), cv::FileStorage::READ);
-        aif::TargetDescription target;
-        const cv::FileNode target_node(file[target.getDefaultName()]);
-        if (target_node.empty()) {
+        const cv::Ptr< const aif::TargetDescription > target(
+            aif::load< aif::TargetDescription >(file.root()));
+        if (!target) {
           ROS_WARN_STREAM("No target description in " << path << ". Skip.");
           continue;
         }
-
-        // skip an entry not containing a contour information
-        target_node >> target;
-        if (target.contour.empty()) {
+        if (target->contour.empty()) {
           ROS_WARN_STREAM("No reference contour in " << path << ". Skip.");
           continue;
         }
 
-        // skip an entry not containing features
-        aif::Results reference;
-        const cv::FileNode reference_node(file[reference.getDefaultName()]);
-        if (reference_node.empty()) {
+        // skip an entry not containing valid features
+        const cv::Ptr< const aif::Results > reference(aif::load< aif::Results >(file.root()));
+        if (!reference) {
           ROS_WARN_STREAM("No reference features in " << path << ". Skip.");
           continue;
         }
-
-        // skip an entry containing invalid features
-        reference_node >> reference;
-        if (reference.keypoints.empty() || reference.descriptors.empty()) {
+        if (reference->keypoints.empty() || reference->descriptors.empty()) {
           ROS_WARN_STREAM("Empty reference feature in " << path << ". Skip.");
           continue;
         }
-        if (reference.keypoints.size() != reference.descriptors.rows) {
+        if (reference->keypoints.size() != reference->descriptors.rows) {
           ROS_WARN_STREAM("Feature size mismatch in " << path << ". Skip.");
           continue;
         }
 
         // load valid reference features
         names_.push_back(reference_name);
-        contours_.push_back(target.contour);
+        contours_.push_back(target->contour);
         matchers_.push_back(new aif::ResultMatcher(reference));
         ROS_INFO_STREAM("Loaded the reference \"" << reference_name << "\" from " << path << " ("
-                                                  << reference.keypoints.size() << " features)");
+                                                  << reference->keypoints.size() << " features)");
       }
       ROS_INFO_STREAM("Loaded " << names_.size() << " reference feature sets");
     }
@@ -120,7 +114,8 @@ public:
     // load feature algorithm
     {
       const cv::FileStorage file(parameter_file, cv::FileStorage::READ);
-      cv::Ptr< aif::FeatureParameters > params(aif::readFeatureParameters(file.root()));
+      cv::Ptr< const aif::FeatureParameters > params(
+          aif::load< aif::FeatureParameters >(file.root()));
       if (!params) {
         ROS_WARN_STREAM("No feature parameters in " << parameter_file
                                                     << ". Use default parameters.");
@@ -184,7 +179,7 @@ public:
 private:
   std::vector< std::string > names_;
   std::vector< std::vector< cv::Point > > contours_;
-  std::vector< cv::Ptr< affine_invariant_features::ResultMatcher > > matchers_;
+  std::vector< cv::Ptr< const affine_invariant_features::ResultMatcher > > matchers_;
 
   cv::Ptr< cv::Feature2D > feature_;
 
