@@ -43,7 +43,6 @@ public:
         rp::param< std::string >(rn::append(ns, "reference_directory"), "reference"));
     const std::string parameter_file(
         rp::param< std::string >(rn::append(ns, "parameter_file"), "parameter.yml"));
-    const bool use_simple_feature(rp::param(rn::append(ns, "use_simple_feature"), false));
     const double match_stripes(rp::param(rn::append(ns, "match_stripes"), -1.));
     const double match_ratio(rp::param(rn::append(ns, "match_ratio"), 0.05));
 
@@ -121,14 +120,8 @@ public:
                                                     << ". Use default parameters.");
         params = new aif::SIFTParameters();
       }
-      if (use_simple_feature) {
-        feature_ = params->createFeature();
-        ROS_INFO_STREAM("Created feature algorithm based on " << params->getDefaultName());
-      } else {
-        feature_ = aif::AffineInvariantFeature::create(params->createFeature());
-        ROS_INFO_STREAM("Created affine invariant feature algorithm based on "
-                        << params->getDefaultName());
-      }
+      feature_ = params->createFeature();
+      ROS_INFO_STREAM("Created feature algorithm based on " << params->getDefaultName());
     }
 
     // set other parameters
