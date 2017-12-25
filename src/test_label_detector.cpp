@@ -1,8 +1,10 @@
 #include <string>
 #include <vector>
 
+#include <ros/console.h>
 #include <ros/init.h>
 #include <ros/node_handle.h>
+#include <ros/time.h>
 
 #include <label_detection/label_detector.hpp>
 
@@ -15,9 +17,10 @@ int main(int argc, char *argv[]) {
   ros::init(argc, argv, "test_label_detector");
   ros::NodeHandle handle;
 
-  cv::CommandLineParser args(argc, argv, "{ help | | }"
-                                         "{ @src_image | <none> | }"
-                                         "{ @dst_image | | optional output image }");
+  cv::CommandLineParser args(argc, argv,
+                             "{ help | | }"
+                             "{ @src_image | <none> | }"
+                             "{ @dst_image | | optional output image }");
 
   if (args.has("help")) {
     args.printMessage();
@@ -41,12 +44,16 @@ int main(int argc, char *argv[]) {
 
   std::vector< std::string > names;
   std::vector< std::vector< cv::Point > > contours;
+  const ros::Time start_time(ros::Time::now());
   detector.detect(src_image, names, contours);
+  const ros::Time end_time(ros::Time::now());
+  ROS_INFO_STREAM((end_time - start_time).toSec() << "s elapsed to detect");
 
   cv::Mat dst_image(src_image.clone());
   {
     cv::RNG rng;
     for (std::size_t i = 0; i < contours.size(); ++i) {
+      ROS_INFO_STREAM(i << ": " << names[i] << " found");
       cv::polylines(dst_image, std::vector< std::vector< cv::Point > >(1, contours[i]), true,
                     CV_RGB(rng.uniform(128, 256), rng.uniform(128, 256), rng.uniform(128, 256)), 5);
     }
