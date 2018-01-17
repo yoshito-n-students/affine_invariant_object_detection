@@ -11,8 +11,8 @@
 
 #include <affine_invariant_features/affine_invariant_feature.hpp>
 #include <affine_invariant_features/feature_parameters.hpp>
-#include <affine_invariant_features/results.hpp>
 #include <affine_invariant_features/result_matcher.hpp>
+#include <affine_invariant_features/results.hpp>
 #include <affine_invariant_features/target.hpp>
 
 #include <boost/filesystem.hpp>
@@ -143,6 +143,7 @@ public:
     // extract features in the image
     aif::Results results;
     feature_->detectAndCompute(image, cv::noArray(), results.keypoints, results.descriptors);
+    ROS_INFO_STREAM("Extracted " << results.keypoints.size() << " features from the target image");
 
     // match features in the image and the references
     std::vector< cv::Matx33f > transforms;
@@ -179,6 +180,6 @@ private:
   double match_stripes_;
   double match_ratio_;
 };
-}
+} // namespace label_detection
 
 #endif
