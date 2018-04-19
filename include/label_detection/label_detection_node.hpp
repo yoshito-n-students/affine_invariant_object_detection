@@ -1,6 +1,7 @@
 #ifndef LABEL_DETECTION_LABEL_DETECTION_NODE
 #define LABEL_DETECTION_LABEL_DETECTION_NODE
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -50,37 +51,44 @@ private:
   void onImageReceived(const sensor_msgs::ImageConstPtr &image_msg) {
     namespace cb = cv_bridge;
 
-    // process the received message on demand
-    if (publisher_.getNumSubscribers() == 0) {
-      return;
-    }
+    try {
+      // process the received message on demand
+      if (publisher_.getNumSubscribers() == 0) {
+        return;
+      }
 
-    // received message to opencv image
-    const cb::CvImagePtr image(cb::toCvCopy(image_msg, "bgr8"));
-    if (!image) {
-      ROS_ERROR("Image conversion error");
-      return;
-    }
-    if (image->image.empty()) {
-      ROS_ERROR("Empty image message");
-      return;
-    }
+      // received message to opencv image
+      const cb::CvImagePtr image(cb::toCvCopy(image_msg, "bgr8"));
+      if (!image) {
+        ROS_ERROR("Image conversion error");
+        return;
+      }
+      if (image->image.empty()) {
+        ROS_ERROR("Empty image message");
+        return;
+      }
 
-    // match features in the image and the references
-    std::vector< std::string > names;
-    std::vector< std::vector< cv::Point > > contours;
-    detector_.detect(image->image, names, contours);
+      // match features in the image and the references
+      std::vector< std::string > names;
+      std::vector< std::vector< cv::Point > > contours;
+      detector_.detect(image->image, names, contours);
 
-    // draw the detection results on the image
-    for (std::size_t i = 0; i < names.size(); ++i) {
-      static cv::RNG rng;
-      // draw the label name here ??
-      cv::polylines(image->image, std::vector< std::vector< cv::Point > >(1, contours[i]), true,
-                    CV_RGB(rng.uniform(128, 256), rng.uniform(128, 256), rng.uniform(128, 256)), 5);
+      // draw the detection results on the image
+      for (std::size_t i = 0; i < names.size(); ++i) {
+        static cv::RNG rng;
+        // draw the label name here ??
+        cv::polylines(image->image, std::vector< std::vector< cv::Point > >(1, contours[i]), true,
+                      CV_RGB(rng.uniform(128, 256), rng.uniform(128, 256), rng.uniform(128, 256)),
+                      5);
+      }
+
+      // publish the image with the matched contours
+      publisher_.publish(image->toImageMsg());
+
+    } catch (const std::exception &error) {
+      // show runtime error when happened
+      ROS_ERROR_STREAM(error.what());
     }
-
-    // publish the image with the matched contours
-    publisher_.publish(image->toImageMsg());
   }
 
 private:
