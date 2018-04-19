@@ -8,10 +8,12 @@
 #include <image_transport/image_transport.h>
 #include <image_transport/publisher.h>
 #include <image_transport/subscriber.h>
+#include <image_transport/transport_hints.h>
 #include <ros/console.h>
 #include <ros/names.h>
 #include <ros/node_handle.h>
 #include <ros/param.h>
+#include <ros/transport_hints.h>
 
 #include <label_detection/label_detector.hpp>
 
@@ -35,13 +37,13 @@ public:
     publisher_.shutdown();
 
     // load parameters
-    const std::string transport(rp::param< std::string >(rn::append(ns, "transport"), "raw"));
     detector_.loadParams(ns);
 
     // setup communication
     publisher_ = it::ImageTransport(handle_).advertise("image_out", 1, true);
     subscriber_ = it::ImageTransport(handle_).subscribe(
-        "image_raw", 1, &LabelDetectionNode::onImageReceived, this, transport);
+        "image_raw", 1, &LabelDetectionNode::onImageReceived, this,
+        it::TransportHints("raw", ros::TransportHints(), ros::NodeHandle(ns)));
   }
 
 private:
@@ -54,17 +56,13 @@ private:
     }
 
     // received message to opencv image
-    const cb::CvImagePtr image(cb::toCvCopy(image_msg));
+    const cb::CvImagePtr image(cb::toCvCopy(image_msg, "bgr8"));
     if (!image) {
       ROS_ERROR("Image conversion error");
       return;
     }
     if (image->image.empty()) {
       ROS_ERROR("Empty image message");
-      return;
-    }
-    if (image->image.type() != CV_8UC3) {
-      ROS_ERROR("Not a 24bit color image");
       return;
     }
 
@@ -92,6 +90,7 @@ private:
 
   LabelDetector detector_;
 };
-}
+
+} // namespace label_detection
 
 #endif
