@@ -23,11 +23,11 @@ namespace label_detection {
 
 class LabelDetectionNode {
 public:
-  LabelDetectionNode(const ros::NodeHandle &handle) : handle_(handle) {}
+  LabelDetectionNode(const ros::NodeHandle &nh) : nh_(nh) {}
 
   virtual ~LabelDetectionNode() {}
 
-  void loadParams(const std::string ns = "~") {
+  void loadParams(const std::string param_ns = "~") {
     namespace rp = ros::param;
     namespace rn = ros::names;
     namespace it = image_transport;
@@ -37,13 +37,13 @@ public:
     publisher_.shutdown();
 
     // load parameters
-    detector_.loadParams(ns);
+    detector_.loadParams(param_ns);
 
     // setup communication
-    publisher_ = it::ImageTransport(handle_).advertise("image_out", 1, true);
-    subscriber_ = it::ImageTransport(handle_).subscribe(
+    publisher_ = it::ImageTransport(nh_).advertise("image_out", 1, true);
+    subscriber_ = it::ImageTransport(nh_).subscribe(
         "image_raw", 1, &LabelDetectionNode::onImageReceived, this,
-        it::TransportHints("raw", ros::TransportHints(), ros::NodeHandle(ns)));
+        it::TransportHints("raw", ros::TransportHints(), ros::NodeHandle(param_ns)));
   }
 
 private:
@@ -84,7 +84,7 @@ private:
   }
 
 private:
-  const ros::NodeHandle handle_;
+  const ros::NodeHandle nh_;
   image_transport::Publisher publisher_;
   image_transport::Subscriber subscriber_;
 

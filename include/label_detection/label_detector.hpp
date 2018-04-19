@@ -27,7 +27,7 @@ public:
 
   virtual ~LabelDetector() {}
 
-  void loadParams(const std::string ns = "~") {
+  void loadParams(const std::string param_ns = "~") {
     namespace rp = ros::param;
     namespace rn = ros::names;
     namespace bf = boost::filesystem;
@@ -40,11 +40,11 @@ public:
 
     // load parameters
     const std::string reference_directory(
-        rp::param< std::string >(rn::append(ns, "reference_directory"), "reference"));
+        rp::param< std::string >(rn::append(param_ns, "reference_directory"), "reference"));
     const std::string parameter_file(
-        rp::param< std::string >(rn::append(ns, "parameter_file"), "parameter.yml"));
-    const double match_stripes(rp::param(rn::append(ns, "match_stripes"), -1.));
-    const double match_ratio(rp::param(rn::append(ns, "match_ratio"), 0.05));
+        rp::param< std::string >(rn::append(param_ns, "parameter_file"), "parameter.yml"));
+    const double match_stripes(rp::param(rn::append(param_ns, "match_stripes"), -1.));
+    const double match_ratio(rp::param(rn::append(param_ns, "match_ratio"), 0.05));
 
     // load reference features
     {
