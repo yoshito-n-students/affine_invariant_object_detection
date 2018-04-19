@@ -44,7 +44,9 @@ public:
     publisher_ = it::ImageTransport(nh_).advertise("image_out", 1, true);
     subscriber_ = it::ImageTransport(nh_).subscribe(
         "image_raw", 1, &LabelDetectionNode::onImageReceived, this,
-        it::TransportHints("raw", ros::TransportHints(), ros::NodeHandle(param_ns)));
+        it::TransportHints("raw" /* default transport*/,
+                           ros::TransportHints() /* message connection hints */,
+                           ros::NodeHandle(param_ns) /* try load param_ns/image_transport */));
   }
 
 private:
@@ -77,9 +79,10 @@ private:
       for (std::size_t i = 0; i < names.size(); ++i) {
         static cv::RNG rng;
         // draw the label name here ??
-        cv::polylines(image->image, std::vector< std::vector< cv::Point > >(1, contours[i]), true,
+        cv::polylines(image->image, std::vector< std::vector< cv::Point > >(1, contours[i]),
+                      true /* is_closed (e.g. draw line from last to first) */,
                       CV_RGB(rng.uniform(128, 256), rng.uniform(128, 256), rng.uniform(128, 256)),
-                      5);
+                      5 /* line tickness */);
       }
 
       // publish the image with the matched contours
