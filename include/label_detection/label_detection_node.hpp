@@ -38,6 +38,7 @@ public:
     publisher_.shutdown();
 
     // load parameters
+    desired_encoding_ = rp::param< std::string >(rn::append(param_ns, "desired_encoding"), "bgr8");
     detector_.loadParams(param_ns);
 
     // setup communication
@@ -60,7 +61,7 @@ private:
       }
 
       // received message to opencv image
-      const cb::CvImagePtr image(cb::toCvCopy(image_msg, "bgr8"));
+      const cb::CvImagePtr image(cb::toCvCopy(image_msg, desired_encoding_));
       if (!image) {
         ROS_ERROR("Image conversion error");
         return;
@@ -95,6 +96,8 @@ private:
   }
 
 private:
+  std::string desired_encoding_;
+
   const ros::NodeHandle nh_;
   image_transport::Publisher publisher_;
   image_transport::Subscriber subscriber_;

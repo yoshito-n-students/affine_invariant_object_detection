@@ -24,7 +24,7 @@ image_out (sensor_msgs/Image)
 * path to directory which contains reference feature files (usually <label_name>.yml or <label_name>.yml.gz)
 
 ~parameter_file (string, default: "parameter.yml")
-* file name which specifies feature detection algorithm (usually <feature_name>.yml)
+* path to file which specifies feature detection algorithm (usually <feature_name>.yml)
 * must be the same file used in generating reference feature files
 
 ~match_stripes (double, default: -1.0)
@@ -37,6 +37,11 @@ image_out (sensor_msgs/Image)
 * label is detected if match_ratio is lower
 
 (label_detection_node only)
+
+~desired_encoding (string, default: "bgr8")
+* desired image encoding for internal processing
+* the encoding of an incomming image will be converted to desired_encoding
+* must be the same as the encoding of reference images
 
 ~image_transport (string, default: "raw")
 * transport type of the subscribed image topic
