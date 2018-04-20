@@ -149,14 +149,13 @@ public:
     std::vector< cv::Matx33f > transforms;
     std::vector< std::vector< cv::DMatch > > matches_array;
     aif::ResultMatcher::parallelMatch(matchers_, results, transforms, matches_array,
+                                      std::vector< double >(matchers_.size(), match_ratio_),
                                       match_stripes_);
 
     // project matched reference contours
     for (std::size_t i = 0; i < matchers_.size(); ++i) {
-      // check the match ratio is enough
-      const double nmatched(matches_array[i].size());
-      const double nfeatures(matchers_[i]->getReference().keypoints.size());
-      if (nmatched / nfeatures < match_ratio_) {
+      // check the match was succeeded
+      if (matches_array[i].empty()) {
         continue;
       }
       // project contour
