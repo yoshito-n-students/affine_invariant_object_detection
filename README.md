@@ -17,6 +17,7 @@ image_raw (sensor_msgs/Image)
 (label_detection_node only)
 
 image_out (sensor_msgs/Image)
+* annotated image showing contours and names of detected labels
 * subtopics supported by image_transport are also published
 
 ## Parameters
@@ -35,6 +36,15 @@ image_out (sensor_msgs/Image)
 * highly depends on type of feature detection algorithm
 * compared to \<number of matched features>/\<number of all features in reference>
 * label is detected if match_ratio is lower
+
+~line_tickness (int, default: 3)
+* tickness of detected labels' contours in published images
+
+~text_tickness (int, defalut: 2)
+* tickness of detected labels' names in published images
+
+~font_scale (double, default: 0.8)
+* font size of detected labels' names in published images
 
 (label_detection_node only)
 
