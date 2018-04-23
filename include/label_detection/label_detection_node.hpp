@@ -39,6 +39,9 @@ public:
 
     // load parameters
     desired_encoding_ = rp::param< std::string >(rn::append(param_ns, "desired_encoding"), "bgr8");
+    line_tickness_ = rp::param(rn::append(param_ns, "line_tickness"), 3);
+    text_tickness_ = rp::param(rn::append(param_ns, "text_tickness"), 2);
+    font_scale_ = rp::param(rn::append(param_ns, "font_scale"), 0.8);
     detector_.loadParams(param_ns);
 
     // setup communication
@@ -77,13 +80,20 @@ private:
       detector_.detect(image->image, names, contours);
 
       // draw the detection results on the image
-      for (std::size_t i = 0; i < names.size(); ++i) {
-        static cv::RNG rng;
-        // draw the label name here ??
+      image->image /= 2;
+      for (std::size_t i = 0; i < contours.size(); ++i) {
+        // draw the contours in red
         cv::polylines(image->image, std::vector< std::vector< cv::Point > >(1, contours[i]),
-                      true /* is_closed (e.g. draw line from last to first) */,
-                      CV_RGB(rng.uniform(128, 256), rng.uniform(128, 256), rng.uniform(128, 256)),
-                      5 /* line tickness */);
+                      true /* is_closed (e.g. draw line from last to first) */, CV_RGB(255, 0, 0),
+                      line_tickness_);
+        // draw the name in white at the center of contours
+        const cv::Rect rect(cv::boundingRect(contours[i]));
+        const cv::Size text_size(cv::getTextSize(names[i], cv::FONT_HERSHEY_SIMPLEX, font_scale_,
+                                                 text_tickness_, NULL /* baseline (won't use) */));
+        cv::putText(image->image, names[i],
+                    cv::Point(rect.x + (rect.width - text_size.width) / 2,
+                              rect.y + (rect.height + text_size.height) / 2),
+                    cv::FONT_HERSHEY_SIMPLEX, font_scale_, CV_RGB(255, 255, 255), text_tickness_);
       }
 
       // publish the image with the matched contours
@@ -97,6 +107,8 @@ private:
 
 private:
   std::string desired_encoding_;
+  int line_tickness_, text_tickness_;
+  double font_scale_;
 
   const ros::NodeHandle nh_;
   image_transport::Publisher publisher_;
