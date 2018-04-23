@@ -79,6 +79,11 @@ private:
       std::vector< std::vector< cv::Point > > contours;
       detector_.detect(image->image, names, contours);
 
+      // TODO:
+      //   - publish not annotated image but names and contours of detected labels
+      //     so that user can use the detection results in their favorite way
+      //   - move drawing codes below to a new node
+
       // draw the detection results on the image
       image->image /= 2;
       for (std::size_t i = 0; i < contours.size(); ++i) {
