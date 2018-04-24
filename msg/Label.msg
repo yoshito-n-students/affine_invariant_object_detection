@@ -1,0 +1,2 @@
+string name
+label_detection/Points contours
