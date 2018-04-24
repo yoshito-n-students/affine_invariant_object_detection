@@ -1,2 +1,3 @@
 std_msgs/Header header
-label_detection/Label labels
+string[] names
+label_detection/Points[] contours
