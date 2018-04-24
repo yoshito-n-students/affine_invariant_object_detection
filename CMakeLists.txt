@@ -9,6 +9,7 @@ find_package(
   affine_invariant_features
   cv_bridge
   image_transport
+  message_filters
   message_generation
   nodelet
   roscpp
@@ -54,7 +55,6 @@ add_message_files(
   FILES
   Point.msg
   Points.msg
-  Label.msg
   Labels.msg
 )
 
@@ -114,6 +114,7 @@ catkin_package(
   affine_invariant_features 
   cv_bridge 
   image_transport 
+  message_filters
   message_runtime 
   nodelet 
   roscpp 
@@ -150,6 +151,10 @@ add_executable(
   src/label_detection_node.cpp
 )
 add_executable(
+  label_drawing_node
+  src/label_drawing_node.cpp
+)
+add_executable(
   test_label_detector 
   src/test_label_detector.cpp
 )
@@ -160,10 +165,18 @@ add_dependencies(
   label_detection_node 
   ${label_detection_EXPORTED_TARGETS} 
 )
+add_dependencies(
+  label_drawing_node
+  ${label_detection_EXPORTED_TARGETS}
+)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
   label_detection_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(
+  label_drawing_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(
