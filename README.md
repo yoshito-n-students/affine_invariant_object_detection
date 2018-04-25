@@ -38,22 +38,22 @@ image_out (sensor_msgs/Image)
 ~match_ratio (double, default: 0.05)
 * highly depends on type of feature detection algorithm
 * compared to \<number of matched features>/\<number of all features in reference>
-* label is detected if match_ratio is lower
+* label is detected if ~match_ratio is lower
 
 ~area_ratio (double, default:0.1)
 * compared to \<area of label>/\<total area of image>
-* label is detected if area_ratio is lower
+* label is detected if ~area_ratio is lower
 
 (label_detection_node only)
 
 ~desired_encoding (string, default: "bgr8")
 * desired image encoding for internal processing
-* the encoding of an incomming image will be converted to desired_encoding
+* the encoding of an incomming image will be converted to ~desired_encoding
 * must be the same as the encoding of reference images
 
 ~republish_image (bool, default: false)
 * republish an image when labels on it are detected
-* useful for smaller queue size of label_drawing_node
+* useful for smaller ~queue_size of label_drawing_node
 
 ~image_transport (string, default: "raw")
 * transport type of the subscribed image topic
