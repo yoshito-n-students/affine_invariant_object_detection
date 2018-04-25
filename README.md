@@ -37,6 +37,10 @@ image_out (sensor_msgs/Image)
 * compared to \<number of matched features>/\<number of all features in reference>
 * label is detected if match_ratio is lower
 
+~area_ratio (double, default:0.1)
+* compared to \<area of label>/\<total area of image>
+* label is detected if area_ratio is lower
+
 ~line_tickness (int, default: 3)
 * tickness of detected labels' contours in published images
 
