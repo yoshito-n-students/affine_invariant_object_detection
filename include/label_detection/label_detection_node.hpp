@@ -37,8 +37,8 @@ public:
 
     // reset objects
     image_subscriber_.shutdown();
-    image_publisher_.shutdown();
     label_publisher_.shutdown();
+    image_publisher_.shutdown();
 
     // load parameters
     desired_encoding_ = rp::param< std::string >(rn::append(param_ns, "desired_encoding"), "bgr8");
@@ -46,13 +46,13 @@ public:
     detector_.loadParams(param_ns);
 
     // setup communication
+    image_publisher_ = it_.advertise("image_out", 1, true);
+    label_publisher_ = nh_.advertise< Labels >("labels_out", 1, true);
     image_subscriber_ = it_.subscribe(
         "image_raw", 1, &LabelDetectionNode::onImageReceived, this,
         image_transport::TransportHints(
             "raw" /* default transport*/, ros::TransportHints() /* message connection hints */,
             ros::NodeHandle(param_ns) /* try load param_ns/image_transport */));
-    image_publisher_ = it_.advertise("image_out", 1, true);
-    label_publisher_ = nh_.advertise< Labels >("labels_out", 1, true);
   }
 
 private:
@@ -66,7 +66,7 @@ private:
       }
 
       // received message to opencv image
-      const cb::CvImageConstPtr image(cb::toCvCopy(image_msg, desired_encoding_));
+      const cb::CvImageConstPtr image(cb::toCvShare(image_msg, desired_encoding_));
       if (!image) {
         ROS_ERROR("Image conversion error");
         return;
