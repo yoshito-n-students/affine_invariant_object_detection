@@ -1,6 +1,10 @@
 #ifndef LABEL_DETECTION_LABEL_DRAWING_NODE_HPP
 #define LABEL_DETECTION_LABEL_DRAWING_NODE_HPP
 
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/publisher.h>
 #include <image_transport/subscriber_filter.h>
@@ -10,7 +14,6 @@
 #include <ros/names.h>
 #include <ros/node_handle.h>
 #include <ros/param.h>
-#include <ros/time.h>
 #include <sensor_msgs/Image.h>
 
 #include <label_detection/Labels.h>
@@ -34,6 +37,12 @@ public:
   void loadParams(const std::string &param_ns = "~") {
     namespace rp = ros::param;
     namespace rn = ros::names;
+
+    // reset objects
+    sync_subscriber_.reset();
+    label_subscriber_.unsubscribe();
+    image_subscriber_.unsubscribe();
+    image_publisher_.shutdown();
 
     // load params
     const int queue_size(rp::param(rn::append(param_ns, "queue_size"), 10));
