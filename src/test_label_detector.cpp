@@ -8,6 +8,7 @@
 #include <ros/time.h>
 
 #include <label_detection/label_detector.hpp>
+#include <label_detection/label_drawer.hpp>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -42,10 +43,9 @@ int main(int argc, char *argv[]) {
   }
 
   ld::LabelDetector detector;
+  ld::LabelDrawer drawer;
   detector.loadParams();
-  const int line_tickness(rp::param("~line_tickness", 3));
-  const double font_scale(rp::param("~font_scale", 0.8));
-  const int text_tickness(rp::param("~text_tickness", 2));
+  drawer.loadParams();
 
   std::vector< std::string > names;
   std::vector< std::vector< cv::Point > > contours;
@@ -54,20 +54,8 @@ int main(int argc, char *argv[]) {
   const ros::Time end_time(ros::Time::now());
   ROS_INFO_STREAM((end_time - start_time).toSec() << "s elapsed to detect");
 
-  cv::Mat dst_image(src_image / 2);
-  for (std::size_t i = 0; i < contours.size(); ++i) {
-    //
-    cv::polylines(dst_image, std::vector< std::vector< cv::Point > >(1, contours[i]), true,
-                  CV_RGB(255, 0, 0), line_tickness);
-    //
-    const cv::Rect rect(cv::boundingRect(contours[i]));
-    const cv::Size text_size(
-        cv::getTextSize(names[i], cv::FONT_HERSHEY_SIMPLEX, font_scale, text_tickness, NULL));
-    cv::putText(dst_image, names[i],
-                cv::Point(rect.x + (rect.width - text_size.width) / 2,
-                          rect.y + (rect.height + text_size.height) / 2),
-                cv::FONT_HERSHEY_SIMPLEX, font_scale, CV_RGB(255, 255, 255), text_tickness);
-  }
+  cv::Mat dst_image(src_image.clone());
+  drawer.draw(dst_image,names,contours);
 
   cv::imshow("dst_image", dst_image);
   cv::waitKey(0);
