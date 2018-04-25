@@ -46,7 +46,9 @@ public:
     detector_.loadParams(param_ns);
 
     // setup communication
-    image_publisher_ = it_.advertise("image_out", 1, true);
+    if (republish_image_) {
+      image_publisher_ = it_.advertise("image_out", 1, true);
+    }
     label_publisher_ = nh_.advertise< Labels >("labels_out", 1, true);
     image_subscriber_ = it_.subscribe(
         "image_raw", 1, &LabelDetectionNode::onImageReceived, this,

@@ -20,7 +20,7 @@ labels_out ([label_detection/Labels](msg/Labels.msg))
 
 image_out (sensor_msgs/Image)
 * original image on which labels are detected
-* published when ~republish_image is true
+* advertised and published when ~republish_image is true
 * subtopics supported by ~image_transport are also published
 
 ### Parameters
