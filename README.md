@@ -63,7 +63,7 @@ label_drawing_node
 * draw detected labels on images
 
 ### Subscribed Topics
-image_in (sensor_msgs/Image)
+image_raw (sensor_msgs/Image)
 * base image to be annotated
 
 labels_in ([label_detection/Labels](msg/Labels.msg))

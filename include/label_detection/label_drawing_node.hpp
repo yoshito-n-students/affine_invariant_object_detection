@@ -52,7 +52,7 @@ public:
     image_publisher_ = it_.advertise("image_out", 1, true);
 
     // detection result subscribers
-    image_subscriber_.subscribe(it_, "image_in", 1);
+    image_subscriber_.subscribe(it_, "image_raw", 1);
     label_subscriber_.subscribe(nh_, "labels_in", 1);
 
     // callback on synchronized results
