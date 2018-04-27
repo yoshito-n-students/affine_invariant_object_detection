@@ -10,14 +10,15 @@
 #include <image_transport/publisher.h>
 #include <image_transport/subscriber.h>
 #include <image_transport/transport_hints.h>
+#include <label_detection/label_detector.hpp>
+#include <object_detection_msgs/Objects.h>
+#include <object_detection_msgs/Point.h>
+#include <object_detection_msgs/Points.h>
 #include <ros/console.h>
 #include <ros/names.h>
 #include <ros/node_handle.h>
 #include <ros/param.h>
 #include <ros/transport_hints.h>
-
-#include <label_detection/Labels.h>
-#include <label_detection/label_detector.hpp>
 
 #include <opencv2/core.hpp>
 
@@ -49,7 +50,7 @@ public:
     if (republish_image_) {
       image_publisher_ = it_.advertise("image_out", 1, true);
     }
-    label_publisher_ = nh_.advertise< Labels >("labels_out", 1, true);
+    label_publisher_ = nh_.advertise< object_detection_msgs::Objects >("labels_out", 1, true);
     image_subscriber_ = it_.subscribe(
         "image_raw", 1, &LabelDetectionNode::onImageReceived, this,
         image_transport::TransportHints(
@@ -60,6 +61,7 @@ public:
 private:
   void onImageReceived(const sensor_msgs::ImageConstPtr &image_msg) {
     namespace cb = cv_bridge;
+    namespace odm = object_detection_msgs;
 
     try {
       // process the received message on demand
@@ -90,13 +92,13 @@ private:
       }
 
       // publish names and contours of detected labels
-      Labels labels_msg;
+      odm::Objects labels_msg;
       labels_msg.header = image_msg->header;
       labels_msg.names = names;
       BOOST_FOREACH (const std::vector< cv::Point > &points, contours) {
-        Points points_msg;
+        odm::Points points_msg;
         BOOST_FOREACH (const cv::Point &point, points) {
-          Point point_msg;
+          odm::Point point_msg;
           point_msg.x = point.x;
           point_msg.y = point.y;
           points_msg.points.push_back(point_msg);

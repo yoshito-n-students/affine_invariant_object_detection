@@ -10,8 +10,8 @@ find_package(
   cv_bridge
   image_transport
   message_filters
-  message_generation
   nodelet
+  object_detection_msgs
   roscpp
   sensor_msgs
   std_msgs
@@ -51,12 +51,9 @@ find_package(
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  Point.msg
-  Points.msg
-  Labels.msg
-)
+# add_message_files(
+#   FILES
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -73,10 +70,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -115,8 +112,8 @@ catkin_package(
   cv_bridge 
   image_transport 
   message_filters
-  message_runtime 
   nodelet 
+  object_detection_msgs
   roscpp 
   sensor_msgs 
   std_msgs
@@ -151,10 +148,6 @@ add_executable(
   src/label_detection_node.cpp
 )
 add_executable(
-  label_drawing_node
-  src/label_drawing_node.cpp
-)
-add_executable(
   test_label_detector 
   src/test_label_detector.cpp
 )
@@ -163,20 +156,12 @@ add_executable(
 ## same as for the library above
 add_dependencies(
   label_detection_node 
-  ${label_detection_EXPORTED_TARGETS} 
-)
-add_dependencies(
-  label_drawing_node
-  ${label_detection_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS} 
 )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
   label_detection_node
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(
-  label_drawing_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(

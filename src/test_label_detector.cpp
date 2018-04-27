@@ -1,17 +1,36 @@
 #include <string>
 #include <vector>
 
+#include <label_detection/label_detector.hpp>
 #include <ros/console.h>
 #include <ros/init.h>
 #include <ros/node_handle.h>
-#include <ros/param.h>
 #include <ros/time.h>
-
-#include <label_detection/label_detector.hpp>
-#include <label_detection/label_drawer.hpp>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+
+void draw(cv::Mat &image, const std::vector< std::string > &names,
+          const std::vector< std::vector< cv::Point > > &contours) {
+  const int line_tickness(3), text_tickness(2);
+  const double font_scale(0.8);
+
+  // draw contours in red
+  cv::polylines(image, contours, true /* is_closed (e.g. draw line from last to first point) */,
+                CV_RGB(255, 0, 0), line_tickness);
+
+  // draw names in white at the center of corresponding contours
+  for (std::size_t i = 0; i < names.size(); ++i) {
+    const cv::Rect rect(cv::boundingRect(contours[i]));
+    const cv::Size text_size(cv::getTextSize(names[i], cv::FONT_HERSHEY_SIMPLEX, font_scale,
+                                             text_tickness, NULL /* baseline (won't use) */));
+    cv::putText(image, names[i],
+                cv::Point(rect.x + (rect.width - text_size.width) / 2,
+                          rect.y + (rect.height + text_size.height) / 2),
+                cv::FONT_HERSHEY_SIMPLEX, font_scale, CV_RGB(255, 255, 255), text_tickness);
+  }
+}
 
 int main(int argc, char *argv[]) {
   namespace ld = label_detection;
@@ -43,9 +62,7 @@ int main(int argc, char *argv[]) {
   }
 
   ld::LabelDetector detector;
-  ld::LabelDrawer drawer;
   detector.loadParams();
-  drawer.loadParams();
 
   std::vector< std::string > names;
   std::vector< std::vector< cv::Point > > contours;
@@ -55,7 +72,7 @@ int main(int argc, char *argv[]) {
   ROS_INFO_STREAM((end_time - start_time).toSec() << "s elapsed to detect");
 
   cv::Mat dst_image(src_image.clone());
-  drawer.draw(dst_image,names,contours);
+  draw(dst_image, names, contours);
 
   cv::imshow("dst_image", dst_image);
   cv::waitKey(0);
