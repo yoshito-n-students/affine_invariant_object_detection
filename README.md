@@ -1,6 +1,13 @@
 # label_detection
 A ROS package that detects flat objects in an image using affine invariant feature matching
 
+## Dependencies
+affine_invariant_features
+* https://github.com/yoshito-n-students/affine_invariant_features
+
+object_detection_msgs
+* https://github.com/yoshito-n-students/object_detection_msgs
+
 ## Detection Nodes
 label_detection_node
 * online label detection
@@ -8,22 +15,22 @@ label_detection_node
 test_label_detector
 * offline label detection test
 
-### Subscribed Topics
+## Subscribed Topics
 (label_detection_node only)
 
 image_raw (sensor_msgs/Image)
 
-### Published Topics
+## Published Topics
 (label_detection_node only)
 
-labels_out ([label_detection/Labels](msg/Labels.msg))
+labels_out (object_detection_msgs/Objects)
 
 image_out (sensor_msgs/Image)
 * original image on which labels are detected
 * advertised and published when ~republish_image is true
-* subtopics supported by ~image_transport are also published
+* subtopics supported by image_transport are also published
 
-### Parameters
+## Parameters
 ~reference_directory (string, default: "reference")
 * path to directory which contains reference feature files (usually <label_name>.yml or <label_name>.yml.gz)
 
@@ -53,40 +60,7 @@ image_out (sensor_msgs/Image)
 
 ~republish_image (bool, default: false)
 * republish an image when labels on it are detected
-* useful for smaller ~queue_size of label_drawing_node
-
-~image_transport (string, default: "raw")
-* transport type of the subscribed image topic
-
-## Drawing Nodes
-label_drawing_node
-* draw detected labels on images
-
-### Subscribed Topics
-image_raw (sensor_msgs/Image)
-* base image to be annotated
-
-labels_in ([label_detection/Labels](msg/Labels.msg))
-* detected labels on subscribed images
-* timestamp must match that of a subscribed image
-
-### Published Topics
-image_out (sensor_msgs/Image)
-* annotated image showing contours and names of detected labels
-* subtopics supported by image_transport are also published
-
-### Parameters
-~queue_size (int, default: 10)
-* queue size of a synchronizer for subscribed images and labels
-
-~line_tickness (int, default: 3)
-* tickness of detected labels' contours in published images
-
-~text_tickness (int, defalut: 2)
-* tickness of detected labels' names in published images
-
-~font_scale (double, default: 0.8)
-* font size of detected labels' names in published images
+* useful for smaller ~queue_size of external time synchronizer for image and label messages
 
 ~image_transport (string, default: "raw")
 * transport type of the subscribed image topic
