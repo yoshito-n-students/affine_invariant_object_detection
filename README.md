@@ -1,7 +1,14 @@
 # label_detection
 A ROS package that detects flat objects in an image using affine invariant feature matching
 
-## Nodes
+## Dependencies
+affine_invariant_features
+* https://github.com/yoshito-n-students/affine_invariant_features
+
+object_detection_msgs
+* https://github.com/yoshito-n-students/object_detection_msgs
+
+## Detection Nodes
 label_detection_node
 * online label detection
 
@@ -16,8 +23,11 @@ image_raw (sensor_msgs/Image)
 ## Published Topics
 (label_detection_node only)
 
+labels_out (object_detection_msgs/Objects)
+
 image_out (sensor_msgs/Image)
-* annotated image showing contours and names of detected labels
+* original image on which labels are detected
+* advertised and published when ~republish_image is true
 * subtopics supported by image_transport are also published
 
 ## Parameters
@@ -35,27 +45,22 @@ image_out (sensor_msgs/Image)
 ~match_ratio (double, default: 0.05)
 * highly depends on type of feature detection algorithm
 * compared to \<number of matched features>/\<number of all features in reference>
-* label is detected if match_ratio is lower
+* label is detected if ~match_ratio is lower
 
 ~area_ratio (double, default:0.1)
 * compared to \<area of label>/\<total area of image>
-* label is detected if area_ratio is lower
-
-~line_tickness (int, default: 3)
-* tickness of detected labels' contours in published images
-
-~text_tickness (int, defalut: 2)
-* tickness of detected labels' names in published images
-
-~font_scale (double, default: 0.8)
-* font size of detected labels' names in published images
+* label is detected if ~area_ratio is lower
 
 (label_detection_node only)
 
 ~desired_encoding (string, default: "bgr8")
 * desired image encoding for internal processing
-* the encoding of an incomming image will be converted to desired_encoding
+* the encoding of an incomming image will be converted to ~desired_encoding
 * must be the same as the encoding of reference images
+
+~republish_image (bool, default: false)
+* republish an image when labels on it are detected
+* useful for smaller ~queue_size of external time synchronizer for image and label messages
 
 ~image_transport (string, default: "raw")
 * transport type of the subscribed image topic

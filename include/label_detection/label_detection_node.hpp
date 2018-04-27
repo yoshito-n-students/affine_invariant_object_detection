@@ -10,61 +10,67 @@
 #include <image_transport/publisher.h>
 #include <image_transport/subscriber.h>
 #include <image_transport/transport_hints.h>
+#include <label_detection/label_detector.hpp>
+#include <object_detection_msgs/Objects.h>
+#include <object_detection_msgs/Point.h>
+#include <object_detection_msgs/Points.h>
 #include <ros/console.h>
 #include <ros/names.h>
 #include <ros/node_handle.h>
 #include <ros/param.h>
 #include <ros/transport_hints.h>
 
-#include <label_detection/label_detector.hpp>
-
 #include <opencv2/core.hpp>
+
+#include <boost/foreach.hpp>
 
 namespace label_detection {
 
 class LabelDetectionNode {
 public:
-  LabelDetectionNode(const ros::NodeHandle &nh) : nh_(nh) {}
+  LabelDetectionNode(const ros::NodeHandle &nh) : nh_(nh), it_(nh) {}
 
   virtual ~LabelDetectionNode() {}
 
   void loadParams(const std::string param_ns = "~") {
     namespace rp = ros::param;
     namespace rn = ros::names;
-    namespace it = image_transport;
 
     // reset objects
-    subscriber_.shutdown();
-    publisher_.shutdown();
+    image_subscriber_.shutdown();
+    label_publisher_.shutdown();
+    image_publisher_.shutdown();
 
     // load parameters
     desired_encoding_ = rp::param< std::string >(rn::append(param_ns, "desired_encoding"), "bgr8");
-    line_tickness_ = rp::param(rn::append(param_ns, "line_tickness"), 3);
-    text_tickness_ = rp::param(rn::append(param_ns, "text_tickness"), 2);
-    font_scale_ = rp::param(rn::append(param_ns, "font_scale"), 0.8);
+    republish_image_ = rp::param(rn::append(param_ns, "republish_image"), false);
     detector_.loadParams(param_ns);
 
     // setup communication
-    publisher_ = it::ImageTransport(nh_).advertise("image_out", 1, true);
-    subscriber_ = it::ImageTransport(nh_).subscribe(
+    if (republish_image_) {
+      image_publisher_ = it_.advertise("image_out", 1, true);
+    }
+    label_publisher_ = nh_.advertise< object_detection_msgs::Objects >("labels_out", 1, true);
+    image_subscriber_ = it_.subscribe(
         "image_raw", 1, &LabelDetectionNode::onImageReceived, this,
-        it::TransportHints("raw" /* default transport*/,
-                           ros::TransportHints() /* message connection hints */,
-                           ros::NodeHandle(param_ns) /* try load param_ns/image_transport */));
+        image_transport::TransportHints(
+            "raw" /* default transport*/, ros::TransportHints() /* message connection hints */,
+            ros::NodeHandle(param_ns) /* try load param_ns/image_transport */));
   }
 
 private:
   void onImageReceived(const sensor_msgs::ImageConstPtr &image_msg) {
     namespace cb = cv_bridge;
+    namespace odm = object_detection_msgs;
 
     try {
       // process the received message on demand
-      if (publisher_.getNumSubscribers() == 0) {
+      if (image_publisher_.getNumSubscribers() == 0 && label_publisher_.getNumSubscribers() == 0) {
         return;
       }
 
       // received message to opencv image
-      const cb::CvImagePtr image(cb::toCvCopy(image_msg, desired_encoding_));
+      const cb::CvImageConstPtr image(cb::toCvShare(image_msg, desired_encoding_));
       if (!image) {
         ROS_ERROR("Image conversion error");
         return;
@@ -79,30 +85,27 @@ private:
       std::vector< std::vector< cv::Point > > contours;
       detector_.detect(image->image, names, contours);
 
-      // TODO:
-      //   - publish not annotated image but names and contours of detected labels
-      //     so that user can use the detection results in their favorite way
-      //   - move drawing codes below to a new node
-
-      // draw the detection results on the image
-      image->image /= 2;
-      for (std::size_t i = 0; i < contours.size(); ++i) {
-        // draw the contours in red
-        cv::polylines(image->image, std::vector< std::vector< cv::Point > >(1, contours[i]),
-                      true /* is_closed (e.g. draw line from last to first) */, CV_RGB(255, 0, 0),
-                      line_tickness_);
-        // draw the name in white at the center of contours
-        const cv::Rect rect(cv::boundingRect(contours[i]));
-        const cv::Size text_size(cv::getTextSize(names[i], cv::FONT_HERSHEY_SIMPLEX, font_scale_,
-                                                 text_tickness_, NULL /* baseline (won't use) */));
-        cv::putText(image->image, names[i],
-                    cv::Point(rect.x + (rect.width - text_size.width) / 2,
-                              rect.y + (rect.height + text_size.height) / 2),
-                    cv::FONT_HERSHEY_SIMPLEX, font_scale_, CV_RGB(255, 255, 255), text_tickness_);
+      // publish the original image for less queue size of subscribers
+      // which synchronize processed images and labels
+      if (republish_image_) {
+        image_publisher_.publish(image_msg);
       }
 
-      // publish the image with the matched contours
-      publisher_.publish(image->toImageMsg());
+      // publish names and contours of detected labels
+      odm::Objects labels_msg;
+      labels_msg.header = image_msg->header;
+      labels_msg.names = names;
+      BOOST_FOREACH (const std::vector< cv::Point > &points, contours) {
+        odm::Points points_msg;
+        BOOST_FOREACH (const cv::Point &point, points) {
+          odm::Point point_msg;
+          point_msg.x = point.x;
+          point_msg.y = point.y;
+          points_msg.points.push_back(point_msg);
+        }
+        labels_msg.contours.push_back(points_msg);
+      }
+      label_publisher_.publish(labels_msg);
 
     } catch (const std::exception &error) {
       // show runtime error when happened
@@ -112,12 +115,14 @@ private:
 
 private:
   std::string desired_encoding_;
-  int line_tickness_, text_tickness_;
-  double font_scale_;
+  bool republish_image_;
 
-  const ros::NodeHandle nh_;
-  image_transport::Publisher publisher_;
-  image_transport::Subscriber subscriber_;
+  image_transport::ImageTransport it_;
+  image_transport::Subscriber image_subscriber_;
+  image_transport::Publisher image_publisher_;
+
+  ros::NodeHandle nh_;
+  ros::Publisher label_publisher_;
 
   LabelDetector detector_;
 };
