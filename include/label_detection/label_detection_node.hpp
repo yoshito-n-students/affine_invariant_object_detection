@@ -84,6 +84,10 @@ private:
       std::vector< std::string > names;
       std::vector< std::vector< cv::Point > > contours;
       detector_.detect(image->image, names, contours);
+      if (names.empty() && contours.empty()) {
+        // no labels found
+        return;
+      }
 
       // publish the original image for less queue size of subscribers
       // which synchronize processed images and labels
