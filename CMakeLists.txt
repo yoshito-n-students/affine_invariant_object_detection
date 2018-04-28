@@ -12,6 +12,7 @@ find_package(
   message_filters
   nodelet
   object_detection_msgs
+  pluginlib
   roscpp
   sensor_msgs
   std_msgs
@@ -114,6 +115,7 @@ catkin_package(
   message_filters
   nodelet 
   object_detection_msgs
+  pluginlib
   roscpp 
   sensor_msgs 
   std_msgs
