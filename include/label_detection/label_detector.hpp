@@ -164,29 +164,33 @@ public:
         continue;
       }
       // project contour
-      std::vector< cv::Point2f > contour;
-      contour.insert(contour.end(), contours_[i].begin(), contours_[i].end());
-      cv::perspectiveTransform(contour, contour, transforms[i].inv());
+      std::vector< cv::Point > contour;
+      transformContour(contours_[i], contour, transforms[i].inv());
       // reject small contour
       if (contourAreaOnImage(contour, image.size()) / image_area < area_ratio_) {
         continue;
       }
       // push to the outputs
       names.push_back(names_[i]);
-      contours.resize(contours.size() + 1);
-      contours.back().insert(contours.back().end(), contour.begin(), contour.end());
+      contours.push_back(contour);
     }
   }
 
 private:
-  static double contourAreaOnImage(const std::vector< cv::Point2f > &contour,
+  static void transformContour(const std::vector< cv::Point > &src, std::vector< cv::Point > &dst,
+                               const cv::Matx33f &transform) {
+    // cv::perspectiveTransform() accepts only array of cv::Point2f
+    std::vector< cv::Point2f > contour2f;
+    contour2f.assign(src.begin(), src.end());
+    cv::perspectiveTransform(contour2f, contour2f, transform);
+    dst.assign(contour2f.begin(), contour2f.end());
+  }
+
+  static double contourAreaOnImage(const std::vector< cv::Point > &contour,
                                    const cv::Size &image_size) {
-    // cv::fillPoly accepts only array of arrays of cv::Point
-    std::vector< std::vector< cv::Point > > contours(1);
-    contours[0].assign(contour.begin(), contour.end());
     // count number of pixels both in image frame and contour area
     cv::Mat image_frame(cv::Mat::zeros(image_size, CV_8UC1));
-    cv::fillPoly(image_frame, contours, 255);
+    cv::fillPoly(image_frame, std::vector< std::vector< cv::Point > >(1, contour), 255);
     // return value is double (consistency with cv::contourArea())
     return cv::countNonZero(image_frame);
   }
