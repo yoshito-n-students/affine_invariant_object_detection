@@ -15,7 +15,6 @@
 #include <object_detection_msgs/Objects.h>
 #include <object_detection_msgs/Point.h>
 #include <object_detection_msgs/Points.h>
-#include <ros/console.h>
 #include <ros/node_handle.h>
 #include <ros/transport_hints.h>
 
@@ -73,11 +72,11 @@ private:
       // received message to opencv image
       const cb::CvImageConstPtr image(cb::toCvShare(image_msg, desired_encoding_));
       if (!image) {
-        ROS_ERROR("Image conversion error");
+        NODELET_ERROR("Image conversion error");
         return;
       }
       if (image->image.empty()) {
-        ROS_ERROR("Empty image message");
+        NODELET_ERROR("Empty image message");
         return;
       }
 
@@ -105,7 +104,7 @@ private:
 
     } catch (const std::exception &error) {
       // show runtime error when happened
-      ROS_ERROR_STREAM(error.what());
+      NODELET_ERROR_STREAM(error.what());
     }
   }
 
