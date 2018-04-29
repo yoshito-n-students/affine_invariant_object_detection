@@ -10,7 +10,7 @@
 #include <image_transport/publisher.h>
 #include <image_transport/subscriber.h>
 #include <image_transport/transport_hints.h>
-#include <label_detection/label_detector.hpp>
+#include <label_detection/label_detector_cv.hpp>
 #include <nodelet/nodelet.h>
 #include <object_detection_msgs/Objects.h>
 #include <object_detection_msgs/Point.h>
@@ -137,7 +137,7 @@ private:
   image_transport::Publisher image_publisher_;
   ros::Publisher label_publisher_;
 
-  LabelDetector detector_;
+  LabelDetectorCv detector_;
 };
 
 } // namespace label_detection

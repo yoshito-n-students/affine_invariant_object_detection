@@ -1,5 +1,5 @@
-#ifndef LABEL_DETECTION_LABEL_DETECTOR
-#define LABEL_DETECTION_LABEL_DETECTOR
+#ifndef LABEL_DETECTION_LABEL_DETECTOR_CV_HPP
+#define LABEL_DETECTION_LABEL_DETECTOR_CV_HPP
 
 #include <algorithm>
 #include <string>
@@ -20,11 +20,11 @@
 
 namespace label_detection {
 
-class LabelDetector {
+class LabelDetectorCv {
 public:
-  LabelDetector() {}
+  LabelDetectorCv() {}
 
-  virtual ~LabelDetector() {}
+  virtual ~LabelDetectorCv() {}
 
   void init(const std::string &reference_directory, const std::string &parameter_file) {
     namespace aif = affine_invariant_features;
