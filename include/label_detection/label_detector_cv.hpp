@@ -5,13 +5,12 @@
 #include <string>
 #include <vector>
 
-#include <ros/console.h>
-
 #include <affine_invariant_features/affine_invariant_feature.hpp>
 #include <affine_invariant_features/feature_parameters.hpp>
 #include <affine_invariant_features/result_matcher.hpp>
 #include <affine_invariant_features/results.hpp>
 #include <affine_invariant_features/target.hpp>
+#include <ros/console.h>
 
 #include <boost/filesystem.hpp>
 
@@ -20,6 +19,7 @@
 
 namespace label_detection {
 
+// label detector implementation which does not depend on ros (except console)
 class LabelDetectorCv {
 public:
   LabelDetectorCv() {}
