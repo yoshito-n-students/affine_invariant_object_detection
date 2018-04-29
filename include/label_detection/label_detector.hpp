@@ -35,16 +35,16 @@ public:
     ros::NodeHandle &pnh(getPrivateNodeHandle());
     image_transport::ImageTransport it(nh);
 
+    // init detector
+    detector_.init(pnh.param< std::string >("reference_directory", "reference"),
+                   pnh.param< std::string >("parameter_file", "parameter.yml"));
+
     // load parameters
     desired_encoding_ = pnh.param< std::string >("desired_encoding", "bgr8");
     match_ratio_ = pnh.param("match_ratio", 0.05);
     area_ratio_ = pnh.param("area_ratio", 0.1);
     match_stripes_ = pnh.param("match_stripes", -1.);
     republish_image_ = pnh.param("republish_image", false);
-
-    // init detector
-    detector_.init(pnh.param< std::string >("reference_directory", "reference"),
-                   pnh.param< std::string >("parameter_file", "parameter.yml"));
 
     // setup communication
     if (republish_image_) {
