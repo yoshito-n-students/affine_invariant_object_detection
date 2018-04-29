@@ -20,6 +20,7 @@
 namespace label_detection {
 
 // label detector implementation which does not depend on ros (except console)
+// TODO: remove dependency to ros.console
 class LabelDetectorCv {
 public:
   LabelDetectorCv() {}
