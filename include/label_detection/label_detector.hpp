@@ -96,6 +96,7 @@ private:
       }
 
       // publish names and contours of detected labels
+      // (use a shared pointer to avoid data copy between nodelets)
       odm::ObjectsPtr labels_msg(new odm::Objects);
       labels_msg->header = image_msg->header;
       labels_msg->names = names;
