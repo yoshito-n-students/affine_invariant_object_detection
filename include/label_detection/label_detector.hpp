@@ -1,5 +1,5 @@
-#ifndef LABEL_DETECTION_LABEL_DETECTION_NODE
-#define LABEL_DETECTION_LABEL_DETECTION_NODE
+#ifndef LABEL_DETECTION_LABEL_DETECTOR_HPP
+#define LABEL_DETECTION_LABEL_DETECTOR_HPP
 
 #include <stdexcept>
 #include <string>
@@ -25,11 +25,11 @@
 
 namespace label_detection {
 
-class LabelDetectionNode : public nodelet::Nodelet {
+class LabelDetector : public nodelet::Nodelet {
 public:
-  LabelDetectionNode() {}
+  LabelDetector() {}
 
-  virtual ~LabelDetectionNode() {}
+  virtual ~LabelDetector() {}
 
   virtual void onInit() {
     ros::NodeHandle &nh(getNodeHandle());
@@ -53,7 +53,7 @@ public:
     }
     label_publisher_ = nh.advertise< object_detection_msgs::Objects >("labels_out", 1, true);
     image_subscriber_ = it.subscribe(
-        "image_raw", 1, &LabelDetectionNode::onImageReceived, this,
+        "image_raw", 1, &LabelDetector::onImageReceived, this,
         image_transport::TransportHints("raw" /* default transport*/,
                                         ros::TransportHints() /* message connection hints */,
                                         pnh /* try load pnh.resolveName(image_transport) */));

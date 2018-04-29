@@ -136,15 +136,15 @@ include_directories(
 
 ## Declare a C++ library
 add_library(
-  label_detection_node 
-  src/label_detection_node.cpp
+  label_detector
+  src/label_detector.cpp
 )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 add_dependencies(
-  label_detection_node 
+  label_detector 
   ${catkin_EXPORTED_TARGETS}
 )
 
@@ -159,7 +159,7 @@ add_dependencies(
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
-  label_detection_node
+  label_detector
   ${catkin_LIBRARIES}
 )
 #target_link_libraries(
