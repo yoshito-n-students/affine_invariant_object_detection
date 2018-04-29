@@ -96,10 +96,10 @@ private:
       }
 
       // publish names and contours of detected labels
-      odm::Objects labels_msg;
-      labels_msg.header = image_msg->header;
-      labels_msg.names = names;
-      labels_msg.contours = toContoursMsg(contours);
+      odm::ObjectsPtr labels_msg(new odm::Objects);
+      labels_msg->header = image_msg->header;
+      labels_msg->names = names;
+      labels_msg->contours = toContoursMsg(contours);
       label_publisher_.publish(labels_msg);
 
     } catch (const std::exception &error) {
