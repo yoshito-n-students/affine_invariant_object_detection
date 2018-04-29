@@ -1,18 +1,5 @@
-#include <ros/init.h>
-#include <ros/node_handle.h>
-
 #include <label_detection/label_detection_node.hpp>
+#include <nodelet/nodelet.h>
+#include <pluginlib/class_list_macros.h>
 
-int main(int argc, char *argv[]) {
-  namespace ld = label_detection;
-
-  ros::init(argc, argv, "label_detection_node");
-  ros::NodeHandle handle;
-
-  ld::LabelDetectionNode node(handle);
-  node.loadParams();
-
-  ros::spin();
-
-  return 0;
-}
+PLUGINLIB_EXPORT_CLASS(label_detection::LabelDetectionNode, nodelet::Nodelet);

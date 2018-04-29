@@ -6,8 +6,6 @@
 #include <vector>
 
 #include <ros/console.h>
-#include <ros/names.h>
-#include <ros/param.h>
 
 #include <affine_invariant_features/affine_invariant_feature.hpp>
 #include <affine_invariant_features/feature_parameters.hpp>
@@ -15,7 +13,6 @@
 #include <affine_invariant_features/results.hpp>
 #include <affine_invariant_features/target.hpp>
 
-#include <boost/algorithm/clamp.hpp>
 #include <boost/filesystem.hpp>
 
 #include <opencv2/core.hpp>
@@ -29,25 +26,14 @@ public:
 
   virtual ~LabelDetector() {}
 
-  void loadParams(const std::string param_ns = "~") {
-    namespace rp = ros::param;
-    namespace rn = ros::names;
-    namespace bf = boost::filesystem;
+  void init(const std::string &reference_directory, const std::string &parameter_file) {
     namespace aif = affine_invariant_features;
+    namespace bf = boost::filesystem;
 
     // reset objects
     names_.clear();
     contours_.clear();
     matchers_.clear();
-
-    // load parameters
-    const std::string reference_directory(
-        rp::param< std::string >(rn::append(param_ns, "reference_directory"), "reference"));
-    const std::string parameter_file(
-        rp::param< std::string >(rn::append(param_ns, "parameter_file"), "parameter.yml"));
-    const double match_stripes(rp::param(rn::append(param_ns, "match_stripes"), -1.));
-    const double match_ratio(rp::param(rn::append(param_ns, "match_ratio"), 0.05));
-    const double area_ratio(rp::param(rn::append(param_ns, "area_ratio"), 0.1));
 
     // load reference features
     {
@@ -126,15 +112,11 @@ public:
       feature_ = params->createFeature();
       ROS_INFO_STREAM("Created feature algorithm based on " << params->getDefaultName());
     }
-
-    // set other parameters
-    match_stripes_ = match_stripes;
-    match_ratio_ = boost::algorithm::clamp(match_ratio, 0., 1.);
-    area_ratio_ = boost::algorithm::clamp(area_ratio, 0., 1.);
   }
 
   void detect(const cv::Mat &image, std::vector< std::string > &names,
-              std::vector< std::vector< cv::Point > > &contours) const {
+              std::vector< std::vector< cv::Point > > &contours, const double match_ratio,
+              const double area_ratio, const double match_stripes) const {
     namespace aif = affine_invariant_features;
 
     CV_Assert(feature_);
@@ -153,8 +135,8 @@ public:
     std::vector< cv::Matx33f > transforms;
     std::vector< std::vector< cv::DMatch > > matches_array;
     aif::ResultMatcher::parallelMatch(matchers_, results, transforms, matches_array,
-                                      std::vector< double >(matchers_.size(), match_ratio_),
-                                      match_stripes_);
+                                      std::vector< double >(matchers_.size(), match_ratio),
+                                      match_stripes);
 
     // project matched reference contours
     const std::size_t image_area(image.total());
@@ -167,7 +149,7 @@ public:
       std::vector< cv::Point > contour;
       transformContour(contours_[i], contour, transforms[i].inv());
       // reject small contour
-      if (contourAreaOnImage(contour, image.size()) / image_area < area_ratio_) {
+      if (contourAreaOnImage(contour, image.size()) / image_area < area_ratio) {
         continue;
       }
       // push to the outputs
@@ -196,16 +178,15 @@ private:
   }
 
 private:
+  // reference data
   std::vector< std::string > names_;
   std::vector< std::vector< cv::Point > > contours_;
   std::vector< cv::Ptr< const affine_invariant_features::ResultMatcher > > matchers_;
 
+  // feature algorithm for incomming images
   cv::Ptr< cv::Feature2D > feature_;
-
-  double match_stripes_;
-  double match_ratio_;
-  double area_ratio_;
 };
+
 } // namespace label_detection
 
 #endif
