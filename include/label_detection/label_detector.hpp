@@ -15,9 +15,11 @@
 #include <affine_invariant_features/results.hpp>
 #include <affine_invariant_features/target.hpp>
 
+#include <boost/algorithm/clamp.hpp>
 #include <boost/filesystem.hpp>
 
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
 namespace label_detection {
 
@@ -27,7 +29,7 @@ public:
 
   virtual ~LabelDetector() {}
 
-  void loadParams(const std::string ns = "~") {
+  void loadParams(const std::string param_ns = "~") {
     namespace rp = ros::param;
     namespace rn = ros::names;
     namespace bf = boost::filesystem;
@@ -40,11 +42,12 @@ public:
 
     // load parameters
     const std::string reference_directory(
-        rp::param< std::string >(rn::append(ns, "reference_directory"), "reference"));
+        rp::param< std::string >(rn::append(param_ns, "reference_directory"), "reference"));
     const std::string parameter_file(
-        rp::param< std::string >(rn::append(ns, "parameter_file"), "parameter.yml"));
-    const double match_stripes(rp::param(rn::append(ns, "match_stripes"), -1.));
-    const double match_ratio(rp::param(rn::append(ns, "match_ratio"), 0.05));
+        rp::param< std::string >(rn::append(param_ns, "parameter_file"), "parameter.yml"));
+    const double match_stripes(rp::param(rn::append(param_ns, "match_stripes"), -1.));
+    const double match_ratio(rp::param(rn::append(param_ns, "match_ratio"), 0.05));
+    const double area_ratio(rp::param(rn::append(param_ns, "area_ratio"), 0.1));
 
     // load reference features
     {
@@ -126,7 +129,8 @@ public:
 
     // set other parameters
     match_stripes_ = match_stripes;
-    match_ratio_ = std::min(std::max(match_ratio, 0.), 1.);
+    match_ratio_ = boost::algorithm::clamp(match_ratio, 0., 1.);
+    area_ratio_ = boost::algorithm::clamp(area_ratio, 0., 1.);
   }
 
   void detect(const cv::Mat &image, std::vector< std::string > &names,
@@ -149,25 +153,42 @@ public:
     std::vector< cv::Matx33f > transforms;
     std::vector< std::vector< cv::DMatch > > matches_array;
     aif::ResultMatcher::parallelMatch(matchers_, results, transforms, matches_array,
+                                      std::vector< double >(matchers_.size(), match_ratio_),
                                       match_stripes_);
 
     // project matched reference contours
+    const std::size_t image_area(image.total());
     for (std::size_t i = 0; i < matchers_.size(); ++i) {
-      // check the match ratio is enough
-      const double nmatched(matches_array[i].size());
-      const double nfeatures(matchers_[i]->getReference().keypoints.size());
-      if (nmatched / nfeatures < match_ratio_) {
+      // check the match was succeeded
+      if (matches_array[i].empty()) {
         continue;
       }
       // project contour
       std::vector< cv::Point2f > contour;
       contour.insert(contour.end(), contours_[i].begin(), contours_[i].end());
       cv::perspectiveTransform(contour, contour, transforms[i].inv());
+      // reject small contour
+      if (contourAreaOnImage(contour, image.size()) / image_area < area_ratio_) {
+        continue;
+      }
       // push to the outputs
       names.push_back(names_[i]);
       contours.resize(contours.size() + 1);
       contours.back().insert(contours.back().end(), contour.begin(), contour.end());
     }
+  }
+
+private:
+  static double contourAreaOnImage(const std::vector< cv::Point2f > &contour,
+                                   const cv::Size &image_size) {
+    // cv::fillPoly accepts only array of arrays of cv::Point
+    std::vector< std::vector< cv::Point > > contours(1);
+    contours[0].assign(contour.begin(), contour.end());
+    // count number of pixels both in image frame and contour area
+    cv::Mat image_frame(cv::Mat::zeros(image_size, CV_8UC1));
+    cv::fillPoly(image_frame, contours, 255);
+    // return value is double (consistency with cv::contourArea())
+    return cv::countNonZero(image_frame);
   }
 
 private:
@@ -179,6 +200,7 @@ private:
 
   double match_stripes_;
   double match_ratio_;
+  double area_ratio_;
 };
 } // namespace label_detection
 
