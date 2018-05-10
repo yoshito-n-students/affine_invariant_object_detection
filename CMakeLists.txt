@@ -9,13 +9,11 @@ find_package(
   affine_invariant_features
   cv_bridge
   image_transport
-  message_filters
   nodelet
   object_detection_msgs
   pluginlib
   roscpp
   sensor_msgs
-  std_msgs
   )
 
 ## System dependencies are found with CMake's conventions
@@ -112,13 +110,11 @@ catkin_package(
   affine_invariant_features 
   cv_bridge 
   image_transport 
-  message_filters
   nodelet 
   object_detection_msgs
   pluginlib
   roscpp 
   sensor_msgs 
-  std_msgs
 #  DEPENDS system_lib
 )
 

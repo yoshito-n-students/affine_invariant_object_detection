@@ -17,6 +17,7 @@
 #include <object_detection_msgs/Points.h>
 #include <ros/node_handle.h>
 #include <ros/transport_hints.h>
+#include <sensor_msgs/Image.h>
 
 #include <opencv2/core.hpp>
 
