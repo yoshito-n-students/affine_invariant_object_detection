@@ -16,7 +16,6 @@
 #include <object_detection_msgs/Point.h>
 #include <object_detection_msgs/Points.h>
 #include <ros/node_handle.h>
-#include <ros/transport_hints.h>
 #include <sensor_msgs/Image.h>
 
 #include <opencv2/core.hpp>
@@ -47,15 +46,17 @@ public:
     match_stripes_ = pnh.param("match_stripes", -1.);
     republish_image_ = pnh.param("republish_image", false);
 
-    // setup communication
+    // setup result publishers
     if (republish_image_) {
       image_publisher_ = it.advertise("image_out", 1, true);
     }
     label_publisher_ = nh.advertise< object_detection_msgs::Objects >("labels_out", 1, true);
+
+    // start label detection
+    const image_transport::TransportHints default_hints;
     image_subscriber_ = it.subscribe(
         "image_raw", 1, &LabelDetector::onImageReceived, this,
-        image_transport::TransportHints("raw" /* default transport*/,
-                                        ros::TransportHints() /* message connection hints */,
+        image_transport::TransportHints(default_hints.getTransport(), default_hints.getRosHints(),
                                         pnh /* try load pnh.resolveName(image_transport) */));
   }
 
