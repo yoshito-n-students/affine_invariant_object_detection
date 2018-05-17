@@ -36,7 +36,7 @@ image_out (sensor_msgs/Image)
 * compared to \<number of matched features>/\<number of all features in reference>
 * label is detected if ~match_ratio is lower
 
-~area_ratio (double, default:0.1)
+~area_ratio (double, default: 0.1)
 * compared to \<area of label within image>/\<total area of image>
 * label is detected if ~area_ratio is lower
 
