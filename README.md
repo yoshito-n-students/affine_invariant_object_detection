@@ -8,21 +8,10 @@ affine_invariant_features
 object_detection_msgs
 * https://github.com/yoshito-n-students/object_detection_msgs
 
-## Detection Nodes
-label_detection_node
-* online label detection
-
-test_label_detector
-* offline label detection test
-
 ## Subscribed Topics
-(label_detection_node only)
-
 image_raw (sensor_msgs/Image)
 
 ## Published Topics
-(label_detection_node only)
-
 labels_out (object_detection_msgs/Objects)
 
 image_out (sensor_msgs/Image)
@@ -51,8 +40,6 @@ image_out (sensor_msgs/Image)
 * compared to \<area of label within image>/\<total area of image>
 * label is detected if ~area_ratio is lower
 
-(label_detection_node only)
-
 ~desired_encoding (string, default: "bgr8")
 * desired image encoding for internal processing
 * the encoding of an incomming image will be converted to ~desired_encoding
@@ -64,3 +51,7 @@ image_out (sensor_msgs/Image)
 
 ~image_transport (string, default: "raw")
 * transport type of the subscribed image topic
+
+## Examples
+label_detection_example
+* https://github.com/yoshito-n-students/label_detection_example
