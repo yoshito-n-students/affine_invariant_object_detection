@@ -1,0 +1,5 @@
+<library path="lib/liblabel_detector">
+    <class name="label_detection/LabelDetector" type="label_detection::LabelDetector" base_class_type="nodelet::Nodelet">
+        <description>detect labels in image using affine invariant features</description>
+    </class>
+</library>

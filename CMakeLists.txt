@@ -9,12 +9,11 @@ find_package(
   affine_invariant_features
   cv_bridge
   image_transport
-  message_filters
   nodelet
   object_detection_msgs
+  pluginlib
   roscpp
   sensor_msgs
-  std_msgs
   )
 
 ## System dependencies are found with CMake's conventions
@@ -111,12 +110,11 @@ catkin_package(
   affine_invariant_features 
   cv_bridge 
   image_transport 
-  message_filters
   nodelet 
   object_detection_msgs
+  pluginlib
   roscpp 
   sensor_msgs 
-  std_msgs
 #  DEPENDS system_lib
 )
 
@@ -133,41 +131,37 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(label_detection
-#   src/${PROJECT_NAME}/label_detection.cpp
-# )
+add_library(
+  label_detector
+  src/label_detector.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(label_detection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(
+  label_detector 
+  ${catkin_EXPORTED_TARGETS}
+)
 
 ## Declare a C++ executable
-add_executable(
-  label_detection_node 
-  src/label_detection_node.cpp
-)
-add_executable(
-  test_label_detector 
-  src/test_label_detector.cpp
-)
+#add_executable(
+#  test_label_detector 
+#  src/test_label_detector.cpp
+#)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(
-  label_detection_node 
-  ${catkin_EXPORTED_TARGETS} 
-)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
-  label_detection_node
+  label_detector
   ${catkin_LIBRARIES}
 )
-target_link_libraries(
-  test_label_detector
-  ${catkin_LIBRARIES}
-)
+#target_link_libraries(
+#  test_label_detector
+#  ${catkin_LIBRARIES}
+#)
 
 #############
 ## Install ##
