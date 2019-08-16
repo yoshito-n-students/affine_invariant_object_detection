@@ -116,8 +116,8 @@ public:
   }
 
   void detect(const cv::Mat &image, std::vector< std::string > &names,
-              std::vector< std::vector< cv::Point > > &contours, const double match_ratio,
-              const double area_ratio, const double match_stripes) const {
+              std::vector< double > &scores, std::vector< std::vector< cv::Point > > &contours,
+              const double match_ratio, const double area_ratio, const double match_stripes) const {
     namespace aif = affine_invariant_features;
 
     CV_Assert(feature_);
@@ -155,6 +155,8 @@ public:
       }
       // push to the outputs
       names.push_back(names_[i]);
+      scores.push_back(static_cast< double >(matches_array[i].size()) /
+                       matchers_[i]->getReference().keypoints.size());
       contours.push_back(contour);
     }
   }

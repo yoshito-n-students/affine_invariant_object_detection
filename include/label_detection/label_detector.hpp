@@ -83,8 +83,9 @@ private:
 
       // match features in the image and the references
       std::vector< std::string > names;
+      std::vector< double > scores;
       std::vector< std::vector< cv::Point > > contours;
-      detector_.detect(image->image, names, contours, match_ratio_, area_ratio_, match_stripes_);
+      detector_.detect(image->image, names, scores, contours, match_ratio_, area_ratio_, match_stripes_);
       if (names.empty() && contours.empty()) {
         // no labels found
         return;
@@ -101,6 +102,7 @@ private:
       const odm::ObjectsPtr labels_msg(new odm::Objects);
       labels_msg->header = image_msg->header;
       labels_msg->names = names;
+      labels_msg->probabilities = scores;
       labels_msg->contours = odm::toContoursMsg(contours);
       label_publisher_.publish(labels_msg);
 
